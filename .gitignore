@@ -1,0 +1,242 @@
+# =============================================================================
+# Platform Engineer POC - Git Ignore
+# =============================================================================
+
+# =============================================================================
+# Terraform
+# =============================================================================
+
+# State files (stored in GCS backend, not in git)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+
+# Keep lock file for reproducible builds
+# .terraform.lock.hcl  # UNCOMMENT to ignore, but recommended to commit
+
+# Variables with secrets (use terraform.tfvars.example as template)
+terraform.tfvars
+*.auto.tfvars
+!*.tfvars.example
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Plan files
+*.tfplan
+tfplan
+
+# =============================================================================
+# GCP / Google Cloud
+# =============================================================================
+
+# Service account keys (NEVER commit these!)
+*-sa-key.json
+*-credentials.json
+service-account*.json
+gcp-key*.json
+credentials.json
+
+# gcloud configuration
+.gcloudignore
+
+# =============================================================================
+# Kubernetes / kubectl
+# =============================================================================
+
+kubeconfig
+*.kubeconfig
+kubeconfig.*
+.kube/
+
+# =============================================================================
+# Helm
+# =============================================================================
+
+charts/*.tgz
+*.tgz
+Chart.lock
+
+# Helm dependencies
+charts/**/charts/
+
+# =============================================================================
+# FluxCD / GitOps (Brique 2)
+# =============================================================================
+
+# Flux bootstrap secrets
+flux-system/gotk-components.yaml.bak
+
+# Decrypted secrets (SOPS)
+*.dec
+*.dec.yaml
+*.decrypted.yaml
+
+# Age keys for SOPS
+*.agekey
+age.key
+
+# =============================================================================
+# Crossplane (Brique 3)
+# =============================================================================
+
+# Provider credentials
+crossplane-*-creds.yaml
+provider-*-secret.yaml
+
+# =============================================================================
+# Application (Brique 4)
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+.venv/
+env/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+vendor/
+
+# Node.js (if any)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# =============================================================================
+# Docker
+# =============================================================================
+
+# Logs
+*.log
+docker-compose.override.yml
+
+# =============================================================================
+# CI/CD (Brique 4)
+# =============================================================================
+
+# GitHub Actions local testing
+.act/
+
+# =============================================================================
+# IDE / Editors
+# =============================================================================
+
+# VSCode
+.vscode/
+!.vscode/settings.json.example
+!.vscode/extensions.json
+
+# JetBrains (IntelliJ, GoLand, PyCharm)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim/Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+.#*
+
+# =============================================================================
+# OS Generated
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# =============================================================================
+# Secrets & Sensitive Data
+# =============================================================================
+
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Secrets directories
+secrets/
+.secrets/
+private/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.template
+
+# =============================================================================
+# Observability (Brique 5)
+# =============================================================================
+
+# Datadog
+datadog-agent.yaml.local
+
+# Prometheus
+prometheus-data/
+
+# Grafana
+grafana-data/
+
+# =============================================================================
+# Misc
+# =============================================================================
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Large files
+*.iso
+*.dmg
