@@ -1,0 +1,34 @@
+# =============================================================================
+# Example Terraform Variables
+# =============================================================================
+# Copy this file to terraform.tfvars and fill in your values
+#
+# cp terraform.tfvars.example terraform.tfvars
+# =============================================================================
+
+# GCP Project Configuration
+project_id  = "your-gcp-project-id"
+region      = "europe-west1"
+environment = "dev"
+
+# Network Configuration
+network_name  = "platform-vpc"
+subnet_cidr   = "10.0.0.0/20"
+pods_cidr     = "10.16.0.0/14"
+services_cidr = "10.20.0.0/20"
+
+# GKE Configuration
+cluster_name     = "platform-cluster"
+gke_version      = "1.28"
+enable_autopilot = false  # Set to true for Autopilot mode
+node_count       = 1      # Per zone (Standard mode only)
+machine_type     = "e2-medium"
+disk_size_gb     = 50
+
+# Labels
+labels = {
+  managed_by = "terraform"
+  project    = "platform-engineer-poc"
+  team       = "platform"
+}
+
