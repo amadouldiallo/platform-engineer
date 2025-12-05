@@ -1,34 +1,59 @@
 # =============================================================================
-# Example Terraform Variables
+# Terraform Variables - TEMPLATE
 # =============================================================================
-# Copy this file to terraform.tfvars and fill in your values
 #
-# cp terraform.tfvars.example terraform.tfvars
+# 🔄 QUICK SETUP (nouveau projet GCP toutes les 3h):
+#
+#   1. Copier ce fichier:
+#      cp terraform.tfvars.example terraform.tfvars
+#
+#   2. Remplacer PROJECT_ID par votre nouveau project_id:
+#      sed -i 's/PROJECT_ID/kkgcplabs01-XXX/g' terraform.tfvars
+#
+#   3. Ou utiliser le script:
+#      ./init.sh kkgcplabs01-XXX
+#
 # =============================================================================
 
-# GCP Project Configuration
-project_id  = "your-gcp-project-id"
-region      = "europe-west1"
+# =============================================================================
+# 🔴 OBLIGATOIRE - À MODIFIER À CHAQUE NOUVEAU PROJET
+# =============================================================================
+
+project_id = "PROJECT_ID"  # Ex: kkgcplabs01-009, kkgcplabs01-123, etc.
+
+# =============================================================================
+# 🟡 CONFIGURATION RÉGION (adaptée aux contraintes lab GCP)
+# =============================================================================
+
+region      = "us-central1"      # ⚠️ europe-west1 interdit dans labs
+zone        = "us-central1-a"    # Cluster zonal pour économiser quotas
 environment = "dev"
 
-# Network Configuration
+# =============================================================================
+# 🟢 CONFIGURATION RÉSEAU (pas besoin de modifier)
+# =============================================================================
+
 network_name  = "platform-vpc"
 subnet_cidr   = "10.0.0.0/20"
 pods_cidr     = "10.16.0.0/14"
 services_cidr = "10.20.0.0/20"
 
-# GKE Configuration
-cluster_name     = "platform-cluster"
-gke_version      = "1.28"
-enable_autopilot = false  # Set to true for Autopilot mode
-node_count       = 1      # Per zone (Standard mode only)
-machine_type     = "e2-medium"
-disk_size_gb     = 50
+# =============================================================================
+# 🟢 CONFIGURATION GKE (adaptée aux contraintes lab GCP)
+# =============================================================================
 
-# Labels
+cluster_name = "platform-cluster"
+gke_version  = "1.28"
+node_count   = 1           # 1 seul node (quota limité)
+machine_type = "e2-medium"
+disk_size_gb = 20          # ⚠️ Max 50GB selon org policy
+
+# =============================================================================
+# 🟢 LABELS (pas besoin de modifier)
+# =============================================================================
+
 labels = {
   managed_by = "terraform"
   project    = "platform-engineer-poc"
   team       = "platform"
 }
-
