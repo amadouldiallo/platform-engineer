@@ -64,8 +64,13 @@ output "workload_identity_pool" {
 # =============================================================================
 
 output "node_pool_name" {
-  description = "The name of the default node pool"
-  value       = "default-pool"  # Integrated node pool
+  description = "The name of the primary node pool"
+  value       = google_container_node_pool.primary.name
+}
+
+output "node_count" {
+  description = "Number of nodes in the primary pool"
+  value       = google_container_node_pool.primary.node_count
 }
 
 # =============================================================================

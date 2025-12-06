@@ -57,7 +57,7 @@ variable "enable_autopilot" {
 variable "node_count" {
   description = "Number of nodes in the cluster (no autoscaling for lab cost control)"
   type        = number
-  default     = 3
+  default     = 4
 }
 
 variable "machine_type" {

@@ -3,28 +3,30 @@
 # =============================================================================
 #
 # This module creates:
-# - GKE Cluster (Standard mode) with integrated node pool
+# - GKE Cluster (Standard mode) with separate node pool
 # - Workload Identity enabled for secure GCP service access
 # - Security best practices (private nodes, shielded nodes)
 #
 # Configuration for Lab environment:
-# - 3 nodes e2-medium (no autoscaling for cost control)
+# - Configurable nodes e2-medium (no autoscaling for cost control)
 # - 20GB disk per node (lab quota limit)
 # - Zonal cluster to reduce resource usage
-#
-# Note: Using integrated node pool to avoid org policy issues with default pool
 #
 # =============================================================================
 
 # =============================================================================
-# GKE Cluster (Standard Mode with Integrated Node Pool)
+# GKE Cluster (Standard Mode)
 # =============================================================================
 
 resource "google_container_cluster" "cluster" {
   name     = var.cluster_name
   project  = var.project_id
-  # Use zone for zonal cluster (1 node) or region for regional (3 nodes)
+  # Use zone for zonal cluster or region for regional
   location = var.zone != null ? var.zone : var.region
+
+  # Remove default node pool - we'll create our own
+  remove_default_node_pool = true
+  initial_node_count       = 1
 
   # Network configuration
   network    = var.network_name
@@ -113,10 +115,22 @@ resource "google_container_cluster" "cluster" {
   # Resource labels
   resource_labels = var.labels
 
-  # Integrated node pool configuration (avoids org policy issues with default pool)
-  # Do NOT use remove_default_node_pool as it creates a temp pool with default disk size
-  # Note: Autoscaling is DISABLED for lab cost control - using fixed node count
-  initial_node_count = var.node_count
+  # Deletion protection (disable for POC, enable in production)
+  deletion_protection = false
+}
+
+# =============================================================================
+# Node Pool (Separate resource for easy scaling via Terraform)
+# =============================================================================
+
+resource "google_container_node_pool" "primary" {
+  name       = "primary-pool"
+  project    = var.project_id
+  location   = var.zone != null ? var.zone : var.region
+  cluster    = google_container_cluster.cluster.name
+  
+  # Number of nodes - can be changed without recreating cluster
+  node_count = var.node_count
 
   node_config {
     machine_type = var.machine_type
@@ -145,7 +159,7 @@ resource "google_container_cluster" "cluster" {
 
     # Node labels
     labels = merge(var.labels, {
-      node_pool = "default"
+      node_pool = "primary"
     })
 
     # Node tags for firewall rules
@@ -157,16 +171,10 @@ resource "google_container_cluster" "cluster" {
     }
   }
 
-  # Deletion protection (disable for POC, enable in production)
-  deletion_protection = false
-
-  # Lifecycle: ignore initial_node_count changes to avoid cluster recreation
-  # Node scaling is done via: gcloud container clusters resize
-  lifecycle {
-    ignore_changes = [
-      initial_node_count,
-      node_config,  # Ignore node config changes after creation
-    ]
+  # Management settings
+  management {
+    auto_repair  = true
+    auto_upgrade = true
   }
 }
 
