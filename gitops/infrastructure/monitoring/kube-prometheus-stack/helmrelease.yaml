@@ -41,14 +41,14 @@ spec:
       service:
         type: ClusterIP
       
-      # Ressources minimales
+      # Ressources MINIMALES pour lab
       resources:
         requests:
-          cpu: 100m
-          memory: 128Mi
+          cpu: 25m
+          memory: 64Mi
         limits:
-          cpu: 500m
-          memory: 256Mi
+          cpu: 200m
+          memory: 128Mi
       
       # Dashboards pré-configurés
       defaultDashboardsEnabled: true
@@ -63,14 +63,14 @@ spec:
         retention: 24h
         retentionSize: "1GB"
         
-        # Ressources minimales
+        # Ressources MINIMALES pour lab (3 nodes e2-medium)
         resources:
           requests:
-            cpu: 200m
-            memory: 256Mi
+            cpu: 50m
+            memory: 128Mi
           limits:
-            cpu: 1
-            memory: 512Mi
+            cpu: 500m
+            memory: 384Mi
         
         # Stockage éphémère (pas de PVC pour lab)
         storageSpec: {}
