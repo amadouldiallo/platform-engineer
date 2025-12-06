@@ -44,7 +44,7 @@ services_cidr = "10.20.0.0/20"
 
 cluster_name = "platform-cluster"
 gke_version  = "1.28"
-node_count   = 1           # 1 seul node (quota limité)
+node_count   = 3           # 3 nodes pour FluxCD + infra (autoscaling désactivé)
 machine_type = "e2-medium"
 disk_size_gb = 20          # ⚠️ Max 50GB selon org policy
 

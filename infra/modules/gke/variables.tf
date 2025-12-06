@@ -55,9 +55,9 @@ variable "enable_autopilot" {
 }
 
 variable "node_count" {
-  description = "Number of nodes per zone"
+  description = "Number of nodes in the cluster (no autoscaling for lab cost control)"
   type        = number
-  default     = 1
+  default     = 3
 }
 
 variable "machine_type" {

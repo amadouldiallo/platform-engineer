@@ -7,6 +7,11 @@
 # - Workload Identity enabled for secure GCP service access
 # - Security best practices (private nodes, shielded nodes)
 #
+# Configuration for Lab environment:
+# - 3 nodes e2-medium (no autoscaling for cost control)
+# - 20GB disk per node (lab quota limit)
+# - Zonal cluster to reduce resource usage
+#
 # Note: Using integrated node pool to avoid org policy issues with default pool
 #
 # =============================================================================
@@ -110,6 +115,7 @@ resource "google_container_cluster" "cluster" {
 
   # Integrated node pool configuration (avoids org policy issues with default pool)
   # Do NOT use remove_default_node_pool as it creates a temp pool with default disk size
+  # Note: Autoscaling is DISABLED for lab cost control - using fixed node count
   initial_node_count = var.node_count
 
   node_config {

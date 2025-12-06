@@ -76,9 +76,9 @@ variable "enable_autopilot" {
 }
 
 variable "node_count" {
-  description = "Number of nodes per zone (Standard mode only)"
+  description = "Number of nodes in the cluster (Standard mode only, no autoscaling)"
   type        = number
-  default     = 1
+  default     = 3  # 3 nodes for FluxCD + ingress + cert-manager on e2-medium
 }
 
 variable "machine_type" {
