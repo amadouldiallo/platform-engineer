@@ -74,14 +74,14 @@ output "workload_identity_pool" {
 # =============================================================================
 # Crossplane Outputs
 # =============================================================================
-
-output "crossplane_service_account_email" {
-  description = "Email of the Crossplane Service Account"
-  value       = google_service_account.crossplane.email
-}
-
-output "crossplane_service_account_name" {
-  description = "Name of the Crossplane Service Account"
-  value       = google_service_account.crossplane.name
-}
+# DÉSACTIVÉ - Service Account créé manuellement dans les projets lab
+# output "crossplane_service_account_email" {
+#   description = "Email of the Crossplane Service Account"
+#   value       = google_service_account.crossplane.email
+# }
+#
+# output "crossplane_service_account_name" {
+#   description = "Name of the Crossplane Service Account"
+#   value       = google_service_account.crossplane.name
+# }
 

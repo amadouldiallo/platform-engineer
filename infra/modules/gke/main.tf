@@ -25,8 +25,10 @@ resource "google_container_cluster" "cluster" {
   location = var.zone != null ? var.zone : var.region
 
   # Remove default node pool - we'll create our own
+  # ⚠️ initial_node_count = 0 pour éviter la création d'un pool temporaire
+  #    avec disk size par défaut (100GB) qui dépasse la limite org policy (50GB)
   remove_default_node_pool = true
-  initial_node_count       = 1
+  initial_node_count       = 0
 
   # Network configuration
   network    = var.network_name

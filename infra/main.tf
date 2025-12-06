@@ -83,41 +83,46 @@ module "gke" {
 # =============================================================================
 # Service Account GCP pour Crossplane avec Workload Identity
 # Permet à Crossplane de créer des ressources GCP sans clés
+#
+# ⚠️ NOTE LAB: Désactivé car le projet lab n'a pas les permissions
+#    iam.serviceAccounts.create. Crossplane utilisera le Service Account
+#    par défaut du compute ou une clé manuelle.
 # =============================================================================
 
 # Service Account GCP pour Crossplane
-resource "google_service_account" "crossplane" {
-  account_id   = "crossplane-sa"
-  project      = var.project_id
-  display_name = "Crossplane Service Account"
-  description  = "Service Account for Crossplane to provision GCP resources via Workload Identity"
-}
+# DÉSACTIVÉ dans les projets lab (permissions insuffisantes)
+# resource "google_service_account" "crossplane" {
+#   account_id   = "crossplane-sa"
+#   project      = var.project_id
+#   display_name = "Crossplane Service Account"
+#   description  = "Service Account for Crossplane to provision GCP resources via Workload Identity"
+# }
 
 # Permissions IAM pour Crossplane
-# Note: Permissions minimales selon les besoins (Storage, SQL, Pub/Sub, etc.)
-resource "google_project_iam_member" "crossplane_storage_admin" {
-  project = var.project_id
-  role    = "roles/storage.admin"
-  member  = "serviceAccount:${google_service_account.crossplane.email}"
-}
+# DÉSACTIVÉ - nécessite le Service Account ci-dessus
+# resource "google_project_iam_member" "crossplane_storage_admin" {
+#   project = var.project_id
+#   role    = "roles/storage.admin"
+#   member  = "serviceAccount:${google_service_account.crossplane.email}"
+# }
 
-resource "google_project_iam_member" "crossplane_sql_admin" {
-  project = var.project_id
-  role    = "roles/cloudsql.admin"
-  member  = "serviceAccount:${google_service_account.crossplane.email}"
-}
+# resource "google_project_iam_member" "crossplane_sql_admin" {
+#   project = var.project_id
+#   role    = "roles/cloudsql.admin"
+#   member  = "serviceAccount:${google_service_account.crossplane.email}"
+# }
 
-resource "google_project_iam_member" "crossplane_pubsub_admin" {
-  project = var.project_id
-  role    = "roles/pubsub.admin"
-  member  = "serviceAccount:${google_service_account.crossplane.email}"
-}
+# resource "google_project_iam_member" "crossplane_pubsub_admin" {
+#   project = var.project_id
+#   role    = "roles/pubsub.admin"
+#   member  = "serviceAccount:${google_service_account.crossplane.email}"
+# }
 
 # Workload Identity Binding
-# Lie le Service Account GCP au Service Account Kubernetes
-resource "google_service_account_iam_member" "crossplane_workload_identity" {
-  service_account_id = google_service_account.crossplane.name
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project_id}.svc.id.goog[crossplane-system/crossplane]"
-}
+# DÉSACTIVÉ - nécessite le Service Account ci-dessus
+# resource "google_service_account_iam_member" "crossplane_workload_identity" {
+#   service_account_id = google_service_account.crossplane.name
+#   role               = "roles/iam.workloadIdentityUser"
+#   member             = "serviceAccount:${var.project_id}.svc.id.goog[crossplane-system/crossplane]"
+# }
 

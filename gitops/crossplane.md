@@ -76,11 +76,20 @@ kubectl get provider -n crossplane-system
 kubectl get providerconfig -n crossplane-system
 ```
 
-### Étape 2 : Configurer l'authentification GCP avec Terraform
+### Étape 2 : Configurer l'authentification GCP
 
-> ✅ **Recommandé** : Utiliser Terraform pour créer toutes les ressources IAM
+> ⚠️ **Note Lab** : Les projets lab GCP n'ont pas les permissions `iam.serviceAccounts.create`.
+>    On utilise donc l'**Option B (Service Account Key)** au lieu de Workload Identity.
 
-#### Procédure complète
+#### Option A : Workload Identity avec Terraform (Production)
+
+> ⚠️ **Non disponible dans les projets lab** - Permissions IAM insuffisantes
+
+Cette option est désactivée dans Terraform pour les projets lab. Voir l'Option B ci-dessous.
+
+#### Option B : Service Account Key (Projets Lab)
+
+> ✅ **Utilisé dans les projets lab** - Création manuelle du Service Account
 
 ```bash
 # 1. Aller dans le dossier infra
@@ -126,7 +135,42 @@ terraform output crossplane_service_account_email
 gcloud iam service-accounts list | grep crossplane
 ```
 
-#### Option B : Service Account Key (Alternative, non recommandée)
+#### Procédure pour projets lab (Service Account Key)
+
+```bash
+# 1. Créer un Service Account GCP (via console ou gcloud si permissions OK)
+gcloud iam service-accounts create crossplane-sa \
+  --display-name="Crossplane Service Account" \
+  --project=PROJECT_ID
+
+# Si erreur de permissions, créer via la console GCP :
+# https://console.cloud.google.com/iam-admin/serviceaccounts
+
+# 2. Donner les permissions nécessaires
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:crossplane-sa@PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/storage.admin"
+
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:crossplane-sa@PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/cloudsql.admin"
+
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:crossplane-sa@PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/pubsub.admin"
+
+# 3. Créer une clé JSON
+gcloud iam service-accounts keys create key.json \
+  --iam-account=crossplane-sa@PROJECT_ID.iam.gserviceaccount.com
+
+# 4. Créer le Secret Kubernetes
+kubectl create secret generic gcp-credentials \
+  --from-file=credentials=key.json \
+  -n crossplane-system
+
+# 5. Mettre à jour providerconfig-gcp.yaml
+# Voir la section "Configuration ProviderConfig" ci-dessous
+```
 
 ```bash
 # 1. Créer un Service Account
