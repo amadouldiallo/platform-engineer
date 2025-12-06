@@ -4,6 +4,16 @@
 
 Ce module configure FluxCD pour gérer l'état du cluster Kubernetes via GitOps.
 
+## 📊 Configuration du Cluster
+
+| Ressource | Valeur |
+|-----------|--------|
+| **Nodes** | 3 x e2-medium |
+| **Total CPU** | 6 vCPU |
+| **Total RAM** | 12 GB |
+| **Autoscaling** | ❌ Désactivé (cost control) |
+| **Zone** | us-central1-a |
+
 ## 📋 Architecture
 
 ```
@@ -133,6 +143,8 @@ flux get kustomizations --watch
 
 ## 📦 Composants déployés
 
+> ⚠️ **Note Lab** : Les ressources sont optimisées pour un cluster 3x e2-medium (6 vCPU, 12GB RAM)
+
 ### 1. Ingress-Nginx Controller
 
 | Paramètre | Valeur |
@@ -141,6 +153,8 @@ flux get kustomizations --watch
 | Chart | `ingress-nginx/ingress-nginx` |
 | Version | `4.x` |
 | Service | LoadBalancer (IP externe GCP) |
+| CPU Request | 50m |
+| Memory Request | 64Mi |
 
 ```bash
 # Vérifier l'ingress
@@ -158,6 +172,8 @@ kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.
 | Namespace | `cert-manager` |
 | Chart | `jetstack/cert-manager` |
 | Version | `1.x` |
+| CPU Request | 25m (controller) |
+| Memory Request | 32Mi (controller) |
 
 ```bash
 # Vérifier cert-manager
@@ -175,6 +191,9 @@ kubectl get crds | grep cert-manager
 | Chart | `prometheus-community/kube-prometheus-stack` |
 | Version | `55.x` |
 | Grafana password | `admin` (à changer !) |
+| Prometheus CPU | 50m request |
+| Grafana CPU | 25m request |
+| Retention | 24h / 1GB |
 
 ```bash
 # Vérifier le monitoring
@@ -188,6 +207,17 @@ kubectl port-forward svc/kube-prometheus-stack-grafana 3000:80 -n monitoring
 kubectl port-forward svc/kube-prometheus-stack-prometheus 9090:9090 -n monitoring
 # Ouvrir http://localhost:9090
 ```
+
+### 4. FluxCD Controllers
+
+| Controller | CPU Request | Memory Request |
+|------------|-------------|----------------|
+| source-controller | 25m | 48Mi |
+| kustomize-controller | 25m | 48Mi |
+| helm-controller | 25m | 48Mi |
+| notification-controller | 25m | 48Mi |
+
+> Ces valeurs sont optimisées dans `gitops/clusters/dev/flux-system/gotk-components.yaml`
 
 ## 🔧 Commandes utiles
 
@@ -272,6 +302,36 @@ git push
 
 ## 🚨 Troubleshooting
 
+### ⚠️ Problèmes résolus dans ce POC
+
+#### 1. HelmRepository dans mauvais namespace
+**Problème** : Le `namespace:` dans `kustomization.yaml` override tous les namespaces, y compris HelmRepository qui doit être dans `flux-system`.
+
+**Solution** : Retirer `namespace:` du kustomization et définir le namespace explicitement dans chaque ressource.
+
+```yaml
+# ❌ MAUVAIS - override le namespace de toutes les ressources
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ingress-nginx  # Ceci override aussi HelmRepository !
+
+# ✅ BON - pas de namespace global
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml        # namespace: ingress-nginx
+  - helmrepository.yaml   # namespace: flux-system
+  - helmrelease.yaml      # namespace: ingress-nginx
+```
+
+#### 2. Ressources insuffisantes sur e2-medium
+**Problème** : 1 node e2-medium (2 vCPU) saturé par les pods système GKE.
+
+**Solution** : 
+- Passer à 3 nodes (6 vCPU total)
+- Réduire les requests FluxCD (25m CPU par controller)
+- Réduire les requests Prometheus/Grafana
+
 ### HelmRelease stuck in "Not Ready"
 
 ```bash
@@ -337,10 +397,26 @@ FluxCD utilise un ServiceAccount avec les permissions minimales nécessaires.
 
 ---
 
+## ✅ État actuel
+
+| Composant | Version | Status |
+|-----------|---------|--------|
+| FluxCD | v2.7.5 | ✅ Running |
+| ingress-nginx | 4.14.1 | ✅ Running |
+| cert-manager | v1.19.1 | ✅ Running |
+| kube-prometheus-stack | 55.11.0 | ✅ Running |
+
+### IP Externe Ingress
+```bash
+kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+```
+
+---
+
 ## ➡️ Prochaines étapes
 
-1. **Bootstrap FluxCD** dans votre cluster
-2. **Vérifier** que l'infrastructure est déployée
-3. **Passer à la BRIQUE 3** — Crossplane
+1. ~~**Bootstrap FluxCD** dans votre cluster~~ ✅
+2. ~~**Vérifier** que l'infrastructure est déployée~~ ✅
+3. **Passer à la BRIQUE 3** — Crossplane (provisioning cloud depuis K8s)
 4. **Passer à la BRIQUE 4** — Microservice (ajoutera des apps dans `gitops/apps/`)
 
