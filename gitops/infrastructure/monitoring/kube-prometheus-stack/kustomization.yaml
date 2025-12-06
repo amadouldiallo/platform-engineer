@@ -2,12 +2,11 @@
 # Prometheus Stack Kustomization
 # =============================================================================
 # Agrège tous les fichiers pour déployer kube-prometheus-stack
+# NOTE: Pas de namespace: global car HelmRepository doit être dans flux-system
 # =============================================================================
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
-namespace: monitoring
 
 resources:
   - namespace.yaml

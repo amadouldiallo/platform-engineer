@@ -4,8 +4,7 @@
 # Ce fichier Kustomize agrège tous les composants d'infrastructure
 # FluxCD appliquera tout ce qui est listé ici
 #
-# ⚠️ NOTE: kube-prometheus-stack désactivé car trop gourmand pour e2-medium
-#    Le cluster GKE lab n'a que 2 vCPU / 4GB RAM
+# Cluster: 3 nodes e2-medium (6 vCPU, 12GB RAM total)
 # =============================================================================
 
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -16,7 +15,6 @@ resources:
   - controllers/ingress-nginx
   - controllers/cert-manager
   
-  # Monitoring - DÉSACTIVÉ (ressources insuffisantes sur e2-medium)
-  # Réactiver sur un cluster plus grand :
-  # - monitoring/kube-prometheus-stack
+  # Monitoring (réactivé avec 3 nodes)
+  - monitoring/kube-prometheus-stack
 
