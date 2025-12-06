@@ -1,0 +1,29 @@
+# =============================================================================
+# ProviderConfig GCP
+# =============================================================================
+# Configuration pour authentifier Crossplane auprès de GCP
+# Utilise Workload Identity (recommandé) ou Service Account Key
+# =============================================================================
+
+apiVersion: gcp.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+  namespace: crossplane-system
+spec:
+  # Workload Identity (méthode recommandée)
+  # Crossplane utilise le ServiceAccount du cluster GKE
+  projectID: PROJECT_ID_PLACEHOLDER  # Sera remplacé par le vrai project_id
+  
+  # Option 1: Workload Identity (si configuré)
+  # credentials:
+  #   source: InjectedIdentity
+  
+  # Option 2: Service Account Key (pour lab)
+  # credentials:
+  #   source: Secret
+  #   secretRef:
+  #     namespace: crossplane-system
+  #     name: gcp-credentials
+  #     key: credentials
+

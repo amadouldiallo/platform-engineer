@@ -1,0 +1,53 @@
+# =============================================================================
+# HelmRelease: Crossplane
+# =============================================================================
+# Installe Crossplane pour le provisioning cloud depuis Kubernetes
+# =============================================================================
+
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: crossplane
+  namespace: crossplane-system
+spec:
+  interval: 15m
+  
+  chart:
+    spec:
+      chart: crossplane
+      version: "1.*"         # Version 1.x (dernière stable)
+      sourceRef:
+        kind: HelmRepository
+        name: crossplane
+        namespace: flux-system
+      interval: 1h
+  
+  values:
+    # Configuration Crossplane
+    args:
+      - --enable-external-secret-stores
+    
+    # Ressources MINIMALES pour lab (4 nodes e2-medium)
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    
+    # RBAC
+    rbac:
+      create: true
+    
+    # ServiceAccount
+    serviceAccount:
+      create: true
+      annotations: {}
+    
+    # Metrics pour Prometheus
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: false  # Activé si prometheus-operator installé
+

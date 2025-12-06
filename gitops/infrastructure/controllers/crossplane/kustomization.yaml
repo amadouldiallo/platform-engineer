@@ -1,18 +1,17 @@
 # =============================================================================
-# Apps Kustomization
+# Crossplane Kustomization
 # =============================================================================
-# Ce fichier liste les applications à déployer
-# Sera complété dans la Brique 4 (Microservice)
+# Agrège tous les fichiers pour déployer Crossplane
+# NOTE: Pas de namespace: global car HelmRepository doit être dans flux-system
 # =============================================================================
 
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  # Exemples Crossplane (désactivés par défaut)
-  # Décommenter pour tester :
-  # - examples/gcs-bucket-example.yaml
-  
-  # À ajouter dans Brique 4:
-  # - base/microservice
+  - namespace.yaml
+  - helmrepository.yaml
+  - helmrelease.yaml
+  - provider-gcp.yaml
+  - providerconfig-gcp.yaml
 

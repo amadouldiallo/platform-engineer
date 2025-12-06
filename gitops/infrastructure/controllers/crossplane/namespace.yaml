@@ -1,0 +1,14 @@
+# =============================================================================
+# Namespace: crossplane-system
+# =============================================================================
+# Namespace dédié pour Crossplane et ses providers
+# =============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: crossplane-system
+  labels:
+    app.kubernetes.io/name: crossplane
+    app.kubernetes.io/part-of: crossplane
+
