@@ -159,6 +159,15 @@ resource "google_container_cluster" "cluster" {
 
   # Deletion protection (disable for POC, enable in production)
   deletion_protection = false
+
+  # Lifecycle: ignore initial_node_count changes to avoid cluster recreation
+  # Node scaling is done via: gcloud container clusters resize
+  lifecycle {
+    ignore_changes = [
+      initial_node_count,
+      node_config,  # Ignore node config changes after creation
+    ]
+  }
 }
 
 # =============================================================================
