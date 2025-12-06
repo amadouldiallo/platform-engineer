@@ -41,8 +41,10 @@ spec:
       create: true
     
     # ServiceAccount
+    # Utilise le ServiceAccount créé manuellement avec annotation Workload Identity
     serviceAccount:
-      create: true
+      create: false  # On utilise celui créé dans serviceaccount.yaml
+      name: crossplane
       annotations: {}
     
     # Metrics pour Prometheus

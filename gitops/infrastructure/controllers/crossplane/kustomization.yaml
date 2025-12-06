@@ -10,6 +10,7 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
+  - serviceaccount.yaml
   - helmrepository.yaml
   - helmrelease.yaml
   - provider-gcp.yaml

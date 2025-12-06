@@ -2,7 +2,10 @@
 # ProviderConfig GCP
 # =============================================================================
 # Configuration pour authentifier Crossplane auprès de GCP
-# Utilise Workload Identity (recommandé) ou Service Account Key
+# Utilise Workload Identity (recommandé)
+# 
+# ⚠️ IMPORTANT: Le projectID doit être mis à jour après terraform apply
+# Terraform crée le Service Account GCP et le Workload Identity binding
 # =============================================================================
 
 apiVersion: gcp.upbound.io/v1beta1
@@ -11,19 +14,12 @@ metadata:
   name: default
   namespace: crossplane-system
 spec:
+  # Project ID GCP (à mettre à jour après terraform apply)
+  projectID: PROJECT_ID_PLACEHOLDER  # Ex: kkgcplabs01-032
+  
   # Workload Identity (méthode recommandée)
-  # Crossplane utilise le ServiceAccount du cluster GKE
-  projectID: PROJECT_ID_PLACEHOLDER  # Sera remplacé par le vrai project_id
-  
-  # Option 1: Workload Identity (si configuré)
-  # credentials:
-  #   source: InjectedIdentity
-  
-  # Option 2: Service Account Key (pour lab)
-  # credentials:
-  #   source: Secret
-  #   secretRef:
-  #     namespace: crossplane-system
-  #     name: gcp-credentials
-  #     key: credentials
+  # Le Service Account Kubernetes "crossplane" dans "crossplane-system"
+  # est automatiquement lié au Service Account GCP via Terraform
+  credentials:
+    source: InjectedIdentity
 

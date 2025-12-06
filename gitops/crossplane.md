@@ -76,28 +76,57 @@ kubectl get provider -n crossplane-system
 kubectl get providerconfig -n crossplane-system
 ```
 
-### Étape 2 : Configurer l'authentification GCP
+### Étape 2 : Configurer l'authentification GCP avec Terraform
 
-#### Option A : Workload Identity (Recommandé)
+> ✅ **Recommandé** : Utiliser Terraform pour créer toutes les ressources IAM
+
+#### Procédure complète
 
 ```bash
-# 1. Créer un Service Account GCP
-gcloud iam service-accounts create crossplane-sa \
-  --display-name="Crossplane Service Account"
+# 1. Aller dans le dossier infra
+cd infra
 
-# 2. Donner les permissions nécessaires
-gcloud projects add-iam-policy-binding PROJECT_ID \
-  --member="serviceAccount:crossplane-sa@PROJECT_ID.iam.gserviceaccount.com" \
-  --role="roles/storage.admin"
+# 2. Vérifier le plan Terraform
+terraform plan
 
-# 3. Lier au ServiceAccount Kubernetes
-gcloud iam service-accounts add-iam-policy-binding \
-  crossplane-sa@PROJECT_ID.iam.gserviceaccount.com \
-  --role roles/iam.workloadIdentityUser \
-  --member "serviceAccount:PROJECT_ID.svc.id.goog[crossplane-system/crossplane]"
+# 3. Appliquer les changements
+#    Cela crée :
+#    - Service Account GCP (crossplane-sa)
+#    - Permissions IAM (Storage, SQL, Pub/Sub)
+#    - Workload Identity Binding
+terraform apply
+
+# 4. Mettre à jour les fichiers Crossplane avec les valeurs réelles
+./update-crossplane-config.sh
+
+# 5. Vérifier les fichiers modifiés
+git diff ../gitops/infrastructure/controllers/crossplane/
+
+# 6. Commit et push
+git add ../gitops/infrastructure/controllers/crossplane/
+git commit -m "chore(crossplane): update config with terraform outputs"
+git push
 ```
 
-#### Option B : Service Account Key (Pour lab)
+#### Ce que Terraform crée automatiquement
+
+| Ressource | Description |
+|-----------|-------------|
+| **Service Account GCP** | `crossplane-sa@PROJECT_ID.iam.gserviceaccount.com` |
+| **IAM Roles** | `storage.admin`, `cloudsql.admin`, `pubsub.admin` |
+| **Workload Identity Binding** | Lien SA GCP ↔ SA Kubernetes |
+
+#### Vérification
+
+```bash
+# Vérifier le Service Account créé
+terraform output crossplane_service_account_email
+
+# Vérifier dans GCP
+gcloud iam service-accounts list | grep crossplane
+```
+
+#### Option B : Service Account Key (Alternative, non recommandée)
 
 ```bash
 # 1. Créer un Service Account
@@ -122,23 +151,17 @@ kubectl create secret generic gcp-credentials \
 # Décommenter la section "Option 2: Service Account Key"
 ```
 
-### Étape 3 : Mettre à jour le ProviderConfig
+### Étape 3 : Vérifier la configuration
 
-```yaml
-# gitops/infrastructure/controllers/crossplane/providerconfig-gcp.yaml
-apiVersion: gcp.upbound.io/v1beta1
-kind: ProviderConfig
-metadata:
-  name: default
-  namespace: crossplane-system
-spec:
-  projectID: kkgcplabs01-032  # ⬅️ Remplacer par votre project_id
-  credentials:
-    source: Secret
-    secretRef:
-      namespace: crossplane-system
-      name: gcp-credentials
-      key: credentials
+```bash
+# Vérifier que le ProviderConfig est correct
+kubectl get providerconfig default -n crossplane-system -o yaml
+
+# Vérifier que le ServiceAccount Kubernetes a l'annotation
+kubectl get serviceaccount crossplane -n crossplane-system -o yaml | grep iam.gke.io
+
+# Vérifier que le Provider GCP est prêt
+kubectl get provider provider-gcp -n crossplane-system
 ```
 
 ## 📝 Exemples d'utilisation

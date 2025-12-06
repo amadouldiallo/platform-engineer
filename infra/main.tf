@@ -22,11 +22,12 @@ resource "google_project_service" "required_apis" {
   for_each = toset([
     "compute.googleapis.com",
     "container.googleapis.com",
+    "iam.googleapis.com",  # Needed for Crossplane Workload Identity
+    "storage-api.googleapis.com",  # Needed for GCS buckets
+    "sqladmin.googleapis.com",  # Needed for CloudSQL (Brique 3)
     # Note: APIs below may require elevated permissions in lab projects
     # "cloudresourcemanager.googleapis.com",
-    # "iam.googleapis.com",
     # "servicenetworking.googleapis.com",  # Needed for CloudSQL (Brique 3)
-    # "sqladmin.googleapis.com",           # Needed for CloudSQL (Brique 3)
   ])
 
   project            = var.project_id
@@ -75,5 +76,48 @@ module "gke" {
   labels           = local.common_labels
 
   depends_on = [module.network]
+}
+
+# =============================================================================
+# Crossplane Service Account (Workload Identity)
+# =============================================================================
+# Service Account GCP pour Crossplane avec Workload Identity
+# Permet à Crossplane de créer des ressources GCP sans clés
+# =============================================================================
+
+# Service Account GCP pour Crossplane
+resource "google_service_account" "crossplane" {
+  account_id   = "crossplane-sa"
+  project      = var.project_id
+  display_name = "Crossplane Service Account"
+  description  = "Service Account for Crossplane to provision GCP resources via Workload Identity"
+}
+
+# Permissions IAM pour Crossplane
+# Note: Permissions minimales selon les besoins (Storage, SQL, Pub/Sub, etc.)
+resource "google_project_iam_member" "crossplane_storage_admin" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_service_account.crossplane.email}"
+}
+
+resource "google_project_iam_member" "crossplane_sql_admin" {
+  project = var.project_id
+  role    = "roles/cloudsql.admin"
+  member  = "serviceAccount:${google_service_account.crossplane.email}"
+}
+
+resource "google_project_iam_member" "crossplane_pubsub_admin" {
+  project = var.project_id
+  role    = "roles/pubsub.admin"
+  member  = "serviceAccount:${google_service_account.crossplane.email}"
+}
+
+# Workload Identity Binding
+# Lie le Service Account GCP au Service Account Kubernetes
+resource "google_service_account_iam_member" "crossplane_workload_identity" {
+  service_account_id = google_service_account.crossplane.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "serviceAccount:${var.project_id}.svc.id.goog[crossplane-system/crossplane]"
 }
 

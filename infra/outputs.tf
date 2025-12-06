@@ -1,4 +1,13 @@
 # =============================================================================
+# Project Outputs
+# =============================================================================
+
+output "project_id" {
+  description = "The GCP project ID"
+  value       = var.project_id
+}
+
+# =============================================================================
 # Network Outputs
 # =============================================================================
 
@@ -60,5 +69,19 @@ output "gke_connect_command" {
 output "workload_identity_pool" {
   description = "Workload Identity pool for the cluster"
   value       = module.gke.workload_identity_pool
+}
+
+# =============================================================================
+# Crossplane Outputs
+# =============================================================================
+
+output "crossplane_service_account_email" {
+  description = "Email of the Crossplane Service Account"
+  value       = google_service_account.crossplane.email
+}
+
+output "crossplane_service_account_name" {
+  description = "Name of the Crossplane Service Account"
+  value       = google_service_account.crossplane.name
 }
 
