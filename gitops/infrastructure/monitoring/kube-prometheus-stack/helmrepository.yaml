@@ -1,0 +1,15 @@
+# =============================================================================
+# HelmRepository: prometheus-community
+# =============================================================================
+# Définit le dépôt Helm de la communauté Prometheus
+# =============================================================================
+
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: prometheus-community
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://prometheus-community.github.io/helm-charts
+

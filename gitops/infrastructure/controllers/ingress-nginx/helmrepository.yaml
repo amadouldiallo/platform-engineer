@@ -1,0 +1,16 @@
+# =============================================================================
+# HelmRepository: ingress-nginx
+# =============================================================================
+# Définit le dépôt Helm officiel d'ingress-nginx
+# FluxCD téléchargera l'index des charts depuis cette URL
+# =============================================================================
+
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: ingress-nginx
+  namespace: flux-system     # Les HelmRepositories sont dans flux-system
+spec:
+  interval: 1h               # Rafraîchit l'index toutes les heures
+  url: https://kubernetes.github.io/ingress-nginx
+

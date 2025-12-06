@@ -1,0 +1,69 @@
+# =============================================================================
+# HelmRelease: cert-manager
+# =============================================================================
+# Installe cert-manager pour la gestion automatique des certificats TLS
+# =============================================================================
+
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  interval: 15m
+  
+  chart:
+    spec:
+      chart: cert-manager
+      version: "v1.*"        # Version 1.x (dernière stable)
+      sourceRef:
+        kind: HelmRepository
+        name: cert-manager
+        namespace: flux-system
+      interval: 1h
+  
+  # Installation des CRDs (obligatoire pour cert-manager)
+  install:
+    crds: Create
+  upgrade:
+    crds: CreateReplace
+  
+  values:
+    # Installer les CRDs avec le chart
+    installCRDs: true
+    
+    # Ressources MINIMALES pour lab e2-medium (2 vCPU, 4GB)
+    resources:
+      requests:
+        cpu: 25m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+    
+    # Webhook resources - MINIMAL
+    webhook:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          cpu: 50m
+          memory: 32Mi
+    
+    # CA Injector resources - MINIMAL
+    cainjector:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 50m
+          memory: 64Mi
+    
+    # Prometheus metrics
+    prometheus:
+      enabled: true
+      servicemonitor:
+        enabled: false  # Activé si prometheus-operator installé
+

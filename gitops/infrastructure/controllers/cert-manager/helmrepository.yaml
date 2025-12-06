@@ -1,0 +1,15 @@
+# =============================================================================
+# HelmRepository: cert-manager
+# =============================================================================
+# Définit le dépôt Helm officiel de Jetstack (cert-manager)
+# =============================================================================
+
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cert-manager
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://charts.jetstack.io
+

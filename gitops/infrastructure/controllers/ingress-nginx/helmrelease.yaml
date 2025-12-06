@@ -1,0 +1,59 @@
+# =============================================================================
+# HelmRelease: ingress-nginx
+# =============================================================================
+# Installe le chart ingress-nginx avec nos values personnalisées
+# Équivalent de: helm install ingress-nginx ingress-nginx/ingress-nginx
+# =============================================================================
+
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+spec:
+  interval: 15m              # Vérifie les mises à jour du chart
+  
+  chart:
+    spec:
+      chart: ingress-nginx   # Nom du chart
+      version: "4.*"         # Version 4.x (dernière stable)
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx
+        namespace: flux-system
+      interval: 1h
+  
+  # Valeurs personnalisées du chart
+  # Voir: https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx
+  values:
+    controller:
+      # Réplicas (1 pour dev, 2+ pour prod)
+      replicaCount: 1
+      
+      # Service type (LoadBalancer crée une IP externe sur GKE)
+      service:
+        type: LoadBalancer
+        annotations:
+          # GCP: créer un Load Balancer externe
+          cloud.google.com/load-balancer-type: "External"
+      
+      # Ressources MINIMALES pour lab e2-medium (2 vCPU, 4GB)
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+      
+      # Métriques pour Prometheus
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: false  # Activé si prometheus-operator installé
+      
+      # Config pour les logs
+      config:
+        use-forwarded-headers: "true"
+        compute-full-forwarded-for: "true"
+

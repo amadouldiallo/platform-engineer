@@ -1,0 +1,7 @@
+# =============================================================================
+# Apps directory
+# =============================================================================
+# Ce dossier contiendra les applications métier (Brique 4)
+# Pour l'instant, il est vide mais doit exister pour que FluxCD fonctionne
+# =============================================================================
+

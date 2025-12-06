@@ -1,0 +1,14 @@
+# =============================================================================
+# Apps Kustomization
+# =============================================================================
+# Ce fichier liste les applications à déployer
+# Sera complété dans la Brique 4 (Microservice)
+# =============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources: []
+  # À ajouter dans Brique 4:
+  # - base/microservice
+

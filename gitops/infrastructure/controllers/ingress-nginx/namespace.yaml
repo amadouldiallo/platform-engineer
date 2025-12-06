@@ -1,0 +1,14 @@
+# =============================================================================
+# Namespace: ingress-nginx
+# =============================================================================
+# Namespace dédié pour l'Ingress Controller
+# =============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+

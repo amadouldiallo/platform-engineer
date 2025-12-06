@@ -1,0 +1,13 @@
+# =============================================================================
+# Namespace: monitoring
+# =============================================================================
+# Namespace dédié pour la stack de monitoring
+# =============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    app.kubernetes.io/name: monitoring
+

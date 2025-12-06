@@ -1,0 +1,126 @@
+# =============================================================================
+# HelmRelease: kube-prometheus-stack
+# =============================================================================
+# Installe Prometheus, Grafana et Alertmanager
+# Version minimale pour le POC (ressources réduites)
+# =============================================================================
+
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 15m
+  
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "55.*"        # Version 55.x
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      interval: 1h
+  
+  # Timeout plus long car chart volumineux
+  install:
+    timeout: 10m
+  upgrade:
+    timeout: 10m
+  
+  values:
+    # =================================
+    # Grafana
+    # =================================
+    grafana:
+      enabled: true
+      adminPassword: "admin"  # ⚠️ Changer en production !
+      
+      # Service type (ClusterIP pour accès via port-forward)
+      service:
+        type: ClusterIP
+      
+      # Ressources minimales
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+      
+      # Dashboards pré-configurés
+      defaultDashboardsEnabled: true
+      defaultDashboardsTimezone: Europe/Paris
+    
+    # =================================
+    # Prometheus
+    # =================================
+    prometheus:
+      prometheusSpec:
+        # Rétention courte pour le POC
+        retention: 24h
+        retentionSize: "1GB"
+        
+        # Ressources minimales
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1
+            memory: 512Mi
+        
+        # Stockage éphémère (pas de PVC pour lab)
+        storageSpec: {}
+        
+        # Scrape tous les ServiceMonitors
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+    
+    # =================================
+    # Alertmanager
+    # =================================
+    alertmanager:
+      enabled: true
+      alertmanagerSpec:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+    
+    # =================================
+    # Node Exporter
+    # =================================
+    nodeExporter:
+      enabled: true
+      resources:
+        requests:
+          cpu: 50m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
+    
+    # =================================
+    # Kube State Metrics
+    # =================================
+    kubeStateMetrics:
+      enabled: true
+    
+    # =================================
+    # Désactiver composants non nécessaires
+    # =================================
+    kubeEtcd:
+      enabled: false         # Pas d'accès à etcd sur GKE
+    kubeControllerManager:
+      enabled: false         # Pas d'accès sur GKE
+    kubeScheduler:
+      enabled: false         # Pas d'accès sur GKE
+    kubeProxy:
+      enabled: false         # Pas d'accès sur GKE
+
